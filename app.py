@@ -7,55 +7,64 @@ st.title("📄 Transcript Evaluation Dashboard")
 
 uploaded_file = st.file_uploader("Upload Transcript", type=["pdf"])
 
-# Always show layout
-left, center, right = st.columns([1, 2, 1])
-
-# LEFT PANEL
-with left:
-    st.subheader("📂 Queue")
-
-    st.markdown("""
-    **John Doe**  
-    🔴 HIGH RISK  
-    72% confidence  
-    2 flags
-    """)
+# Two columns instead of three
+center, right = st.columns([2, 1])
 
 # CENTER PANEL
 with center:
     st.subheader("🧾 Review")
 
+    if uploaded_file:
+        confidence = "72%"
+        flags = "2"
+        status = "Request Review"
+    else:
+        confidence = "--"
+        flags = "--"
+        status = "Waiting for upload"
+
     col1, col2, col3 = st.columns(3)
-    col1.metric("Confidence", "72%")
-    col2.metric("Flags", "2")
-    col3.metric("Status", "Request Review")
+    col1.metric("Confidence", confidence)
+    col2.metric("Flags", flags)
+    col3.metric("Status", status)
 
     st.markdown("---")
 
     st.write("### 👤 Student Info")
-    st.write({
-        "Name": "John Doe",
-        "School": "XYZ University",
-        "Program": "MS Business Analytics"
-    })
+    if uploaded_file:
+        st.write({
+            "Name": "John Doe",
+            "School": "XYZ University",
+            "Program": "MS Business Analytics"
+        })
+    else:
+        st.info("Upload a transcript to see details")
 
     st.write("### 📊 Extracted Data")
-    st.write({
-        "GPA": "8.2 / 10",
-        "Credits": "120"
-    })
+    if uploaded_file:
+        st.write({
+            "GPA": "8.2 / 10",
+            "Credits": "120"
+        })
 
     st.write("### 🚩 Flags")
-    st.warning("GPA scale not standard")
-    st.warning("Missing course mapping")
+    if uploaded_file:
+        st.warning("Detected GPA scale (10-point) not aligned with 4.0 standard")
+        st.warning("Missing course mapping for equivalency check")
 
 # RIGHT PANEL
 with right:
     st.subheader("⚡ Actions")
 
-    st.button("✅ Accept")
-    st.button("🟡 Request Review")
-    st.button("🔴 Escalate")
+    if uploaded_file:
+        if st.button("✅ Accept"):
+            st.success("Application accepted")
+
+        if st.button("🟡 Request Review"):
+            st.warning("Marked for review")
+
+        if st.button("🔴 Escalate"):
+            st.error("Escalated to registrar")
 
     st.markdown("---")
 
@@ -67,7 +76,7 @@ with right:
 
         pdf_display = f"""
         <iframe src="data:application/pdf;base64,{base64_pdf}" 
-        width="100%" height="500px">
+        width="100%" height="600px">
         </iframe>
         """
         st.markdown(pdf_display, unsafe_allow_html=True)
